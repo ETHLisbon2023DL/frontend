@@ -1,95 +1,77 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+
+import { Box, Button, Image, Flex, VStack, Text } from "@chakra-ui/react";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 
 export default function Home() {
-  return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+	const { open } = useWeb3Modal();
+	const router = useRouter();
+	const [role, setRole] = useState<string>();
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+	const handleLogin = async (role: string) => {
+		try {
+			setRole(role);
+			await open();
+		} catch (error) {
+			console.error("Failed to open web3 modal", error);
+		}
+	};
 
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
+	const { address } = useAccount();
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
+	useEffect(() => {
+		if (address && role) {
+			router.push(`/${role}`);
+		}
+	}, [address, role, router]);
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+	return (
+		<Flex direction={"row"} h="100vh">
+			<Box flex="1">
+				<Image
+					src="/homepage.jpg"
+					alt="Descriptive Alt Text"
+					objectFit="cover"
+					objectPosition="top"
+					height="100%"
+					width="100%"
+				/>
+			</Box>
+			<VStack
+				flex="1"
+				direction="column"
+				justify="flex-start"
+				align="center"
+				p="10"
+				spacing="10"
+			>
+				<VStack align="start">
+					<Text fontSize="4xl">Welcome to Appname</Text>
+					<Text fontSize="2xl" color="gray.500">
+						Login to the Dashboard
+					</Text>
+				</VStack>
+				<Flex direction="column" justify="center" align="center" flexGrow={1}>
+					<Button
+						colorScheme="blue"
+						size="lg"
+						mb="4"
+						onClick={() => handleLogin("patient")}
+					>
+						Patient
+					</Button>
+					<Button
+						colorScheme="green"
+						size="lg"
+						onClick={() => handleLogin("doctor")}
+					>
+						Doctor
+					</Button>
+				</Flex>
+			</VStack>
+		</Flex>
+	);
 }
